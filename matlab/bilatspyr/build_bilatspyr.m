@@ -99,7 +99,7 @@ function [pyr,pind,precomp] = build_bilatspyr(im, ht, filtfile, edgemethod, dMap
     %% --- create bilateral pyramid
     % -- step 0 ---
     % build 3D extended representation of image
-    im3d = scat_build(im, dMapNorm, downsampledDepth);
+    im3d = fastbilat_build(im, dMapNorm, downsampledDepth);
     
     % keep track of valid input data
     origD = im3d.gridData;
@@ -108,15 +108,15 @@ function [pyr,pind,precomp] = build_bilatspyr(im, ht, filtfile, edgemethod, dMap
 
     % -- step 1 ---
     % apply 2D spatial smoothing kernel
-    im3d = scat_tdistconv(im3d, .1);
-    %im3d = scat_gaussconv(im3d, 1);
+    im3d = fastbilat_tdistconv(im3d, .1);
+    %im3d = fastbilat_gaussconv(im3d, 1);
     
     % perform 1D depth smoothing kernel
-    im3d = scat_convn(im3d, kernelZ);
+    im3d = fastbilat_convn(im3d, kernelZ);
     
     % -- step 2 ---
     % element-wise division by weight total
-    im3d = scat_normalize(im3d);
+    im3d = fastbilat_normalize(im3d);
 
     % -- step 3 ---
     % replace data again
@@ -125,8 +125,8 @@ function [pyr,pind,precomp] = build_bilatspyr(im, ht, filtfile, edgemethod, dMap
     %% ---
     
     % intial lowpass/highpass filters
-    lo03d = scat_corrDn(im3d, lo0filt, edgemethod, [1 1], [1 1]);
-    hi03d = scat_corrDn(im3d, hi0filt, edgemethod, [1 1], [1 1]);
+    lo03d = fastbilat_corrDn(im3d, lo0filt, edgemethod, [1 1], [1 1]);
+    hi03d = fastbilat_corrDn(im3d, hi0filt, edgemethod, [1 1], [1 1]);
     
     %% build level recursively
     outputs = buildSpyrLevs(lo03d, ht, lofilt, bfilts, edgemethod, kernelZ);
@@ -186,16 +186,16 @@ function [pyr, pind] = out_to_pyr_pind_map(outputs)
     pyr = out;
 end
 
-function scat = scat_tdistconv(scat, sSigma)
+function x3d = fastbilat_tdistconv(x3d, sSigma)
     % convolution with t-distribution kernel
-    scat.gridData = tdistconv( scat.gridData, sSigma );
-    scat.gridWeights = tdistconv( scat.gridWeights, sSigma );
+    x3d.gridData = tdistconv( x3d.gridData, sSigma );
+    x3d.gridWeights = tdistconv( x3d.gridWeights, sSigma );
 end
 
-function scat = scat_gaussconv(scat, sSigma)
+function x3d = fastbilat_gaussconv(x3d, sSigma)
     % convolution with gauss kernel
-    scat.gridData = gaussconv( scat.gridData, sSigma );
-    scat.gridWeights = gaussconv( scat.gridWeights, sSigma );
+    x3d.gridData = gaussconv( x3d.gridData, sSigma );
+    x3d.gridWeights = gaussconv( x3d.gridWeights, sSigma );
 end
 
 function outputs = buildSpyrLevs(lo03d,ht,lofilt,bfilts,edgemethod,kernelZ)
@@ -207,14 +207,14 @@ function outputs = buildSpyrLevs(lo03d,ht,lofilt,bfilts,edgemethod,kernelZ)
     % Eero Simoncelli, 6/96.
 
     cur3d = lo03d;
-    %cur3d = scat_corrDn(cur3d, lofilt_G, edgemethod, [1 1], [1 1]);      
-    %cur3d = scat_convn(cur3d, kernelZ);
-    %cur3d = scat_normalize(cur3d);
-    %cur3d = scat_corr_gridonly(cur3d, lofilt_R, edgemethod);
+    %cur3d = fastbilat_corrDn(cur3d, lofilt_G, edgemethod, [1 1], [1 1]);      
+    %cur3d = fastbilat_convn(cur3d, kernelZ);
+    %cur3d = fastbilat_normalize(cur3d);
+    %cur3d = fastbilat_corr_gridonly(cur3d, lofilt_R, edgemethod);
 
     
     if (ht <= 0)
-        %cur3d = scat_normalize(cur3d);
+        %cur3d = fastbilat_normalize(cur3d);
         
         if ~isreal(bfilts)
             % FIXME
@@ -226,7 +226,7 @@ function outputs = buildSpyrLevs(lo03d,ht,lofilt,bfilts,edgemethod,kernelZ)
         end
         
         outputs = {cur3d};
-      %lo0 = scat_upsample(cur3d);
+      %lo0 = fastbilat_upsample(cur3d);
       %pyr = lo0(:);
       %pind = size(lo0);
 
@@ -242,19 +242,19 @@ function outputs = buildSpyrLevs(lo03d,ht,lofilt,bfilts,edgemethod,kernelZ)
             filt = reshape(bfilts(:,b),bfiltsz,bfiltsz);
 
             band3d = cur3d;
-            band3d = scat_corr_gridonly(band3d, filt, edgemethod);
-            %band3d = scat_normalize(band3d);
+            band3d = fastbilat_corr_gridonly(band3d, filt, edgemethod);
+            %band3d = fastbilat_normalize(band3d);
                 
             boutput = [boutput, band3d];
             
-            %band = scat_upsample(band3d);
+            %band = fastbilat_upsample(band3d);
             %bands(:,b) = band(:);
             %bind(b,:)  = size(band);
         end
 
         % prepare for next layer
         lo3d = lo03d;
-        lo3d = scat_corrDn_gridonly(lo3d, lofilt, edgemethod, [2 2], [1 1]);
+        lo3d = fastbilat_corrDn_gridonly(lo3d, lofilt, edgemethod, [2 2], [1 1]);
 
         noutputs = buildSpyrLevs(lo3d, ht-1, lofilt, bfilts, edgemethod, kernelZ);
 
@@ -263,7 +263,7 @@ function outputs = buildSpyrLevs(lo03d,ht,lofilt,bfilts,edgemethod,kernelZ)
 
 end
 
-function s = scat_build(im, dMapIndices, downsampledDepth)
+function s = fastbilat_build(im, dMapIndices, downsampledDepth)
 
     [inputHeight, inputWidth] = size(im);
     
@@ -313,106 +313,106 @@ function s = scat_build(im, dMapIndices, downsampledDepth)
     s.size2d = [size(s.gridData,1), size(s.gridData,2)];
 end
 
-function output = scat_upsample(scat)
+function output = fastbilat_upsample(x3d)
     % no rounding!
 
     if 0
         % interpn takes rows, then cols, etc
         % i.e. size(v,1), then size(v,2), ...
-        output = interpn( scat.gridData, scat.di, scat.dj, scat.map, 'linear');
+        output = interpn( x3d.gridData, x3d.di, x3d.dj, x3d.map, 'linear');
     else
-        mapl = floor(scat.map);
-        maph = ceil(scat.map);
-        alpha = scat.map - mapl;
+        mapl = floor(x3d.map);
+        maph = ceil(x3d.map);
+        alpha = x3d.map - mapl;
 
-        d = size(scat.gridData, 3);
+        d = size(x3d.gridData, 3);
         mapl(mapl < 1) = 1; maph(maph < 1) = 1;
         mapl(mapl > d) = d; maph(maph > d) = d;
         
-        indl = sub2ind(size(scat.gridData), scat.di, scat.dj, mapl);
-        indh = sub2ind(size(scat.gridData), scat.di, scat.dj, maph);
+        indl = sub2ind(size(x3d.gridData), x3d.di, x3d.dj, mapl);
+        indh = sub2ind(size(x3d.gridData), x3d.di, x3d.dj, maph);
         
-        output = scat.gridData(indl) .* (1-alpha) + scat.gridData(indh) .* alpha;
+        output = x3d.gridData(indl) .* (1-alpha) + x3d.gridData(indh) .* alpha;
     end
 end
 
-function scat = scat_convn(scat, kernelZ)
+function x3d = fastbilat_convn(x3d, kernelZ)
     % convolution
-    scat.gridData = convn( scat.gridData, kernelZ, 'same' );
-    scat.gridWeights = convn( scat.gridWeights, kernelZ, 'same' );
+    x3d.gridData = convn( x3d.gridData, kernelZ, 'same' );
+    x3d.gridWeights = convn( x3d.gridWeights, kernelZ, 'same' );
 end
 
-function scat = scat_normalize(scat)
+function x3d = fastbilat_normalize(x3d)
     % normalize
     thresh = 0;
-    mask = (scat.gridWeights <= thresh);
-    normalizedGrid = scat.gridData ./ scat.gridWeights;
+    mask = (x3d.gridWeights <= thresh);
+    normalizedGrid = x3d.gridData ./ x3d.gridWeights;
     normalizedGrid( mask ) = 0; % put 0s where it's undefined
     
-    scat.gridData = normalizedGrid;
-    scat.gridWeights = cast(~mask, 'like', scat.gridWeights);
+    x3d.gridData = normalizedGrid;
+    x3d.gridWeights = cast(~mask, 'like', x3d.gridWeights);
 end
 
-function scat = scat_normalize_OLD(scat)
+function x3d = fastbilat_normalize_OLD(x3d)
     % normalize
-    gridWeights = scat.gridWeights; 
+    gridWeights = x3d.gridWeights; 
     gridWeights( gridWeights == 0 ) = -2; % avoid divide by 0, won't read there anyway
-    normalizedGrid = scat.gridData ./ gridWeights;
+    normalizedGrid = x3d.gridData ./ gridWeights;
     normalizedGrid( gridWeights < -1 ) = 0; % put 0s where it's undefined
     
-    scat.gridData = normalizedGrid;
-    scat.gridWeights(scat.gridWeights ~= 0) = 1;
+    x3d.gridData = normalizedGrid;
+    x3d.gridWeights(x3d.gridWeights ~= 0) = 1;
 end
 
 
-function scat = scat_subsample(scat, step, start)
-    scat.gridData = scat.gridData(start(1):step(1):end, start(2):step(2):end, :);
-    scat.gridWeights = scat.gridWeights(start(1):step(1):end, start(2):step(2):end, :);
-    size2d = [size(scat.gridData,1), size(scat.gridData,2)];
-    scat.di = scat.di(1:size2d(1), 1:size2d(2));
-    scat.dj = scat.dj(1:size2d(1), 1:size2d(2));
-    scat.map = scat.map(start(1):step(1):end, start(2):step(2):end);
-    scat.size2d = size2d;
+function x3d = fastbilat_subsample(x3d, step, start)
+    x3d.gridData = x3d.gridData(start(1):step(1):end, start(2):step(2):end, :);
+    x3d.gridWeights = x3d.gridWeights(start(1):step(1):end, start(2):step(2):end, :);
+    size2d = [size(x3d.gridData,1), size(x3d.gridData,2)];
+    x3d.di = x3d.di(1:size2d(1), 1:size2d(2));
+    x3d.dj = x3d.dj(1:size2d(1), 1:size2d(2));
+    x3d.map = x3d.map(start(1):step(1):end, start(2):step(2):end);
+    x3d.size2d = size2d;
 end
 
-function s = scat_corrDn(scat, lofilt, edgemethod, step, start)
+function s = fastbilat_corrDn(x3d, lofilt, edgemethod, step, start)
     response = sum(lofilt(:));
     
     s = struct;
-    s.gridData = corrDnBatch(scat.gridData, lofilt, edgemethod, step, start);
-    s.gridWeights = corrDnBatch(scat.gridWeights, lofilt / response, edgemethod, step, start);
+    s.gridData = corrDnBatch(x3d.gridData, lofilt, edgemethod, step, start);
+    s.gridWeights = corrDnBatch(x3d.gridWeights, lofilt / response, edgemethod, step, start);
     size2d = [size(s.gridData,1), size(s.gridData,2)];
 
-    s.di = scat.di(1:size2d(1), 1:size2d(2));
-    s.dj = scat.dj(1:size2d(1), 1:size2d(2));
-    s.map = scat.map(start(1):step(1):end, start(2):step(2):end);
+    s.di = x3d.di(1:size2d(1), 1:size2d(2));
+    s.dj = x3d.dj(1:size2d(1), 1:size2d(2));
+    s.map = x3d.map(start(1):step(1):end, start(2):step(2):end);
     s.size2d = size2d;
-    %fprintf('%d x %d --> %d x %d\n', scat.size2d(1), scat.size2d(2), s.size2d(1), s.size2d(2));
+    %fprintf('%d x %d --> %d x %d\n', x3d.size2d(1), x3d.size2d(2), s.size2d(1), s.size2d(2));
 end
 
-function s = scat_corr_gridonly(scat, lofilt, edgemethod)
-    s = scat;
+function s = fastbilat_corr_gridonly(x3d, lofilt, edgemethod)
+    s = x3d;
     if isreal(lofilt)
-        s.gridData = corrDnBatch(scat.gridData, lofilt, edgemethod);
+        s.gridData = corrDnBatch(x3d.gridData, lofilt, edgemethod);
     else
         lofilt_r = real(lofilt);
         lofilt_i = imag(lofilt);
-        gdata_r = corrDnBatch(scat.gridData, lofilt_r, edgemethod);
-        gdata_i = corrDnBatch(scat.gridData, lofilt_i, edgemethod);
+        gdata_r = corrDnBatch(x3d.gridData, lofilt_r, edgemethod);
+        gdata_i = corrDnBatch(x3d.gridData, lofilt_i, edgemethod);
         s.gridData = gdata_r + 1j .* gdata_i;
     end
 end
 
-function scat = scat_corrDn_gridonly(scat, lofilt, edgemethod, step, start)
-    scat.gridData = corrDnBatch(scat.gridData, lofilt, edgemethod, step, start);
-    scat.gridWeights = scat.gridWeights(start(1):step(1):end, start(2):step(2):end, :);
+function x3d = fastbilat_corrDn_gridonly(x3d, lofilt, edgemethod, step, start)
+    x3d.gridData = corrDnBatch(x3d.gridData, lofilt, edgemethod, step, start);
+    x3d.gridWeights = x3d.gridWeights(start(1):step(1):end, start(2):step(2):end, :);
     
-    size2d = [size(scat.gridData,1), size(scat.gridData,2)];
+    size2d = [size(x3d.gridData,1), size(x3d.gridData,2)];
 
-    scat.di = scat.di(1:size2d(1), 1:size2d(2));
-    scat.dj = scat.dj(1:size2d(1), 1:size2d(2));
-    scat.map = scat.map(start(1):step(1):end, start(2):step(2):end);
-    scat.size2d = size2d;    
+    x3d.di = x3d.di(1:size2d(1), 1:size2d(2));
+    x3d.dj = x3d.dj(1:size2d(1), 1:size2d(2));
+    x3d.map = x3d.map(start(1):step(1):end, start(2):step(2):end);
+    x3d.size2d = size2d;    
 end
 
 function DEBUG_SCAT_VIEW(x3d, layer)
@@ -428,7 +428,7 @@ function DEBUG_SCAT_VIEW(x3d, layer)
     subplot(2,2,4)
     imagesc(x3d.map);
     %imagesc(abs(x3d.map - layer) < .5)
-    imagesc(scat_upsample(x3d), [0 1])
+    imagesc(fastbilat_upsample(x3d), [0 1])
     set(findobj(gcf, 'type', 'axes'), 'tag', 'x3d')
     linkaxes(findobj('tag', 'x3d'))
     drawnow;
