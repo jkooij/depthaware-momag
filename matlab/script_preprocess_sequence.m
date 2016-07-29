@@ -23,7 +23,7 @@ vD = VideoReader(depth_filepath); % depth video
 while hasFrame(vC)
     %%
     t = t + 1;
-    fprintf('t = %d\n', t);
+    fprintf('.');
 
     % load color and depth frame
     I = readFrame(vC);
@@ -67,3 +67,6 @@ while hasFrame(vC)
     
 end
 
+T = t;
+fprintf('\n', T);
+fprintf('found %d frames\n', T);

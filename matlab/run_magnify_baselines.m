@@ -1,17 +1,16 @@
-close all; clear all;
-
-%% select the sequence
-seq_num = 3;
-
-% ** Baseline composition method **
-% unmagnified : reconstruct original
-% standard    : standard magnification approach                [original]
-% blend       : compose original+magnification at image level  [Elgharib,CVPR'15]
-
-%method_name = 'unmagnified'; % [No motion magnification]
-%method_name = 'standard';    % [Wadhwa'13]
-method_name = 'blend';       % [Elgharib,CVPR'15]
-
+function run_magnify_baselines(seq_num, method_name)
+% Run baseline motion maginification method, possibly using Depth
+% seq_num
+%   selects input sequence, see script_setup_sequence
+%
+% method_name
+%   'unmagnified' : reconstruct original
+%   'standard'    : standard magnification approach                [original]
+%   'blend'       : compose original+magnification at image level  [Elgharib,CVPR'15]
+%
+% Author: Julian Kooij, Delft University of Technology, 2015
+%   "Depth-Aware Motion Magnification", (ECCV 2016)
+%
 %% load sequence data
 script_setup_sequence
 
@@ -19,6 +18,7 @@ script_setup_sequence
 mkdir_check(seq_outdir)
 
 % Turn on to see if image and depth are aligned
+%  see script_setup_sequence
 DEBUG_SHOW_FOREGROUND_MASK = 1; 
 
 cache_filepath = fullfile(seq_outdir, 'preprocessed.mat');
@@ -142,6 +142,9 @@ for t = 1:T
             
             bmask = depth_to_dfactor(DMr);
             I_r = bmask .* I_r2 + (1 - bmask) .* I_r;
+            
+        otherwise,
+            error('unknown baseline method "%s"', method_name);
     end
 
     % slightly more clear output

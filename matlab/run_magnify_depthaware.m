@@ -1,7 +1,11 @@
-close all; clear all;
-
-%% select the sequence
-seq_num = 1;
+function run_magnify_depthaware(seq_num)
+% Run Depth-Aware Motion Maginification method
+% seq_num
+%   selects input sequence, see script_setup_sequence
+%
+% Author: Julian Kooij, Delft University of Technology, 2015
+%   "Depth-Aware Motion Magnification", (ECCV 2016)
+%
 
 % load sequence data
 script_setup_sequence
@@ -10,6 +14,7 @@ script_setup_sequence
 mkdir_check(seq_outdir)
 
 % Turn on to see if image and depth are aligned
+%  see script_setup_sequence
 DEBUG_SHOW_FOREGROUND_MASK = 1; 
 
 cache_filepath = fullfile(seq_outdir, 'preprocessed.mat');

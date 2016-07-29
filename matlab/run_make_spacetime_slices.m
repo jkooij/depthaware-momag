@@ -1,5 +1,4 @@
-%% select the sequence
-seq_num = 1;
+function run_make_spacetime_slices(seq_num, method_name)
 
 % load sequence data
 script_setup_sequence
@@ -15,19 +14,15 @@ switch seq_name
         
     case 'sequence3',
         show_t = 23;
-        %slice_xs = 80; slice_ys = 0 + [1:100];
         slice_xs = 1:100; slice_ys = 25;
-        
+
+    case 'sequence4',
+        show_t = 60;
+        slice_xs = 20; slice_ys = 0 + [5:80];
+
     otherwise,
         error('please define slice for %s\n', seq_name);
 end
-
-% select the method
-%method_name = 'bilatspyr'; % name of our proposed method (used in output filenames only)
-method_name = 'unmagnified'; % [No motion magnification]
-method_name = 'standard';    % [Wadhwa'13]
-method_name = 'blend';       % [Elgharib,CVPR'15]
-
 
 % load the stored results
 output_filename = sprintf('%s_%s_f%.1f.mat', seq_name, method_name, phase_factor);
@@ -53,7 +48,7 @@ if numel(slice_xs) == 1;
 end
 if numel(slice_ys) == 1; dy = [-1:1]; end
 
-Ir_annot = Ir;
+Ir_annot = M_frames(show_t).cdata;
 Ir_annot(slice_ys + dy, slice_xs + dx, 1) = 255;
 Ir_annot(slice_ys + dy, slice_xs + dx, 2) = 0;
 Ir_annot(slice_ys + dy, slice_xs + dx, 3) = 0;

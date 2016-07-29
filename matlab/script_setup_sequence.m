@@ -136,7 +136,7 @@ switch seq_name
         mag_depth_mean = 2500;
         mag_depth_stddev = 100;
         mag_factor = 1;
-        phase_factor = 10;
+        phase_factor = 3;
         
         % bilateral depth settings
         edgeMin = 2300;
