@@ -108,8 +108,8 @@ function [pyr,pind,precomp] = build_bilatspyr(im, ht, filtfile, edgemethod, dMap
 
     % -- step 1 ---
     % apply 2D spatial smoothing kernel
-    im3d = fastbilat_tdistconv(im3d, .1);
-    %im3d = fastbilat_gaussconv(im3d, 1);
+    im3d = fastbilat_tdistconv(im3d); % DEBUG: t-distribution instead of Gaussian for more stable tales
+    %im3d = fastbilat_gaussconv(im3d);
     
     % perform 1D depth smoothing kernel
     im3d = fastbilat_convn(im3d, kernelZ);

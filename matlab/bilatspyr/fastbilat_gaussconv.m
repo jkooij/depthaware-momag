@@ -8,6 +8,8 @@
 %   "Depth-Aware Motion Magnification", (ECCV 2016)
 %
 function x3d = fastbilat_gaussconv(x3d, sSigma)
+    if nargin < 2; sSigma = 1; end
+
     % convolution with gauss kernel
     x3d.gridData = gaussconv( x3d.gridData, sSigma );
     x3d.gridWeights = gaussconv( x3d.gridWeights, sSigma );

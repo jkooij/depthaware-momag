@@ -8,6 +8,8 @@
 %   "Depth-Aware Motion Magnification", (ECCV 2016)
 %
 function x3d = fastbilat_tdistconv(x3d, sSigma)
+    if nargin < 2; sSigma = .1; end
+    
     % convolution with t-distribution kernel
     x3d.gridData = tdistconv( x3d.gridData, sSigma );
     x3d.gridWeights = tdistconv( x3d.gridWeights, sSigma );
