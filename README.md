@@ -7,15 +7,27 @@
 
 1. Clone this repository, e.g. to a local `depthaware-momag' directory
 
-2. Download the [EVM Matlab code](http://people.csail.mit.edu/mrub/evm/#code) from the paper
+2. Install Eero P. Simoncelli's matlabPyrTools, e.g. in the `external/` subdirectory:
+```
+	cd depthaware-momag/external/
+	git clone https://github.com/LabForComputationalVision/matlabPyrTools
+```
+	Follow the instructions to build the mex files in the matlabPyrTools/MEX/ directory.
 
-	"Eulerian Video Magnification for Revealing Subtle Changes in the World"
-	Hao-Yu Wu, Michael Rubinstein, Eugene Shih, John Guttag, Fredo Durand and William T. Freeman
-	ACM Transactions on Graphics (Proc. SIGGRAPH 2012)
+	*Note*: you might get an error in `reconSpyr.m` line 95, and `reconSpyrLevs.m` line 41.
+	In that case, replace the start of those lines,
+```
+	res = upConv(...
+```
+by
+```
+	upConv( ...
+```
+	
+	You can then either add `matlabPyrTools/` and `matlabPyrTools/MEX/` to your Matlab path,
+	or place the dependency in `depthaware-momag/external/` such that `depthaware-momag/startup.m` will add it to your path when needed.
 
-3. Unzip the EVM Matlab code to `depthaware-momag/matlab/external/`
-
-3. Unzip the archive (see below) containing the example sequences `depthaware-momag/data/`, you should have directories
+3. Unzip the data archive(s) (see below) containing the example sequences `depthaware-momag/data/`. You should now have directories
 ```
 	depthaware-momag/data/sequence1/
 	depthaware-momag/data/sequence2/
@@ -25,15 +37,18 @@
 
 4. Compile the mex code. in Matlab go the the `depthaware-momag/matlab/` directory, and run
 ```
+	% go to the project directory
+	cd depthaware-momag/matlab
+
 	% add paths
 	startup
 
 	% build mex code
 	cd mex
-	build_bilatspyr_mex_posix   % on Linux
+	build_bilatspyr_mex_posix   % for Linux
 	build_bilatspyr_mex_windows % for MS Windows
 ```
-
+*NOTE*: to compile the mex code, you might need to adjust the include/library paths, and/or download the [Eigen template library](http://eigen.tuxfamily.org/index.php?title=Main_Page) first.
 
 ## Running depth-aware motion magnification
 In Matlab go the the `depthaware-momag/matlab/` directory, and run
@@ -43,9 +58,13 @@ In Matlab go the the `depthaware-momag/matlab/` directory, and run
 ```
 Results should have been written to `depthaware-momag/output/`
 
+If you open `run_all`, you can see that 
+
 
 ## Data
-Get the data from **TODO** (+/- 2GB).
+Get the data from [here](https://www.dropbox.com/sh/rocql09mddwsum0/AACVD71THjUBoMpuBFwPwOoQa?dl=0) **TODO find beter location**
+
+All sequences together are +/- 2GB.
 Unzip each sequence archive in `depthaware-momag/data/`.
 
 The frames of the sequence are stored as uncompressed MJPEG files (created in Matlab), which you should be able to open in Matlab or python/OpenCV.

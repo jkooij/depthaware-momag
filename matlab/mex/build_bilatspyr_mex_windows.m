@@ -1,6 +1,6 @@
 %% Windows
 
-pyrtoolsmexpath = fullfile(depthaware_momag_basedir, 'matlab/external/EVM_Matlab/matlabPyrTools/MEX/');
+pyrtoolsmexpath = fullfile(depthaware_momag_basedir, 'matlab/external/matlabPyrTools/MEX/');
 fpath = @(name) fullfile(pyrtoolsmexpath, name);
 
 EigenDir = 'D:\libs\Eigen';

@@ -1,6 +1,6 @@
 %% Posix
 
-pyrtoolsmexpath = fullfile(depthaware_momag_basedir, 'matlab/external/EVM_Matlab/matlabPyrTools/MEX/');
+pyrtoolsmexpath = fullfile(depthaware_momag_basedir, 'matlab/external/matlabPyrTools/MEX/');
 fpath = @(n) fullfile(pyrtoolsmexpath, n);
 
 %build corrDnBatch
