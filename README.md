@@ -62,7 +62,7 @@ If you open `run_all`, you can see that
 
 
 ## Data
-Get the data from [here](https://www.dropbox.com/sh/rocql09mddwsum0/AACVD71THjUBoMpuBFwPwOoQa?dl=0) **TODO find beter location**
+Get the data from the [Technology in Motion (TIM) website](https://tim.lumc.nl/site/en/research/downloads/).
 
 All sequences together are +/- 2GB.
 Unzip each sequence archive in `depthaware-momag/data/`.
