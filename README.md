@@ -1,7 +1,11 @@
 # Depth-aware Motion Magnification
-
 (c) Julian Kooij, 2016, Delft University of Technology
 
+This code is made available for research purposes only, and comes with absolutely no warrenty.
+If you use this code, please cite our ECCV'16 paper:
+
+	“Depth-aware Motion Magnification”
+	Julian F. P. Kooij, Jan C. van Gemert, European Conference on Computer Vision 2016.
 
 ## Installation instructions
 
